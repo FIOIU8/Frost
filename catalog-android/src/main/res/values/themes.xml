@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 用框架主题，避免为了一个壳引入 appcompat/material 依赖 -->
+    <style name="Theme.FrostCatalog" parent="@android:style/Theme.Material.Light.NoActionBar" />
+</resources>

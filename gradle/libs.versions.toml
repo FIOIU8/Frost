@@ -23,6 +23,9 @@ miuix = "0.9.4"
 backdrop = "2.0.1"
 kyant-shapes = "1.2.1"
 
+# ---- AndroidX（P1 的 catalog Android 壳用）----
+activityCompose = "1.13.0"
+
 [libraries]
 # Miuix 子模块。聚合构件 top.yukonga.miuix.kmp:miuix 只到 0.8.8，禁止使用。
 miuix-ui = { module = "top.yukonga.miuix.kmp:miuix-ui", version.ref = "miuix" }
@@ -41,11 +44,20 @@ kyant-shapes = { module = "io.github.kyant0:shapes", version.ref = "kyant-shapes
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 
+# Android 壳
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+
 # build-logic 自身需要的插件实现（不走 plugins 块，避免版本二次声明）
 spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
 [bundles]
-miuix = ["miuix-ui", "miuix-preference", "miuix-icons", "miuix-blur", "miuix-shader", "miuix-squircle", "miuix-nav"]
+# 默认 bundle：minSdk 24 可用的 6 个子模块。
+# 注意 miuix-blur 的 AAR 声明 minSdk 33（RuntimeShader 限制），不能放进这个 bundle，
+# 否则 manifest merger 会把整个 App 的 minSdk 顶到 33。见 docs/PLAN.md §3.3 注。
+miuix = ["miuix-ui", "miuix-preference", "miuix-icons", "miuix-shader", "miuix-squircle", "miuix-nav"]
+
+# 仅在明确要求 API 33+ 的模块里单独引用（P4 frost-glass 时再决策）
+miuix-glass = ["miuix-blur"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

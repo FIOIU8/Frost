@@ -29,4 +29,7 @@ rootProject.name = "frost"
 
 // P0：零模块骨架（已完成，Gate G0 绿）
 // P1：加入 :catalog 演示模块，用于验证 Miuix 依赖能否真实解析
+// P1：加入 :catalog 演示模块（KMP，Desktop + Android 目标）
+//     :catalog-android 是 Android 壳（AGP 9 下 application 插件不能与 KMP 插件共存）
 include(":catalog")
+include(":catalog-android")
