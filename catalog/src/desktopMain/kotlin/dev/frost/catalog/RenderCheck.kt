@@ -7,6 +7,7 @@ import dev.frost.catalog.design.FrostListScreen
 import dev.frost.catalog.design.FrostSettingsScreen
 import dev.frost.catalog.design.FrostSettingsWithDialog
 import dev.frost.catalog.design.FrostWeatherScreen
+import dev.frost.catalog.design.FrostWeatherSettingsScreen
 import dev.frost.catalog.showcase.ShowcaseScreen
 import dev.frost.catalog.showcase.showcaseSections
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -49,6 +50,7 @@ fun main(args: Array<String>) {
             "settings-dialog" to { FrostSettingsWithDialog() },
             "list" to { FrostListScreen() },
             "weather" to { FrostWeatherScreen() },
+            "weather-settings" to { FrostWeatherSettingsScreen() },
         )
     frostScreens.forEach { (name, content) ->
         renderTo(outDir.resolve("frost-$name.png"), width = 1240, height = 2772, content = content)

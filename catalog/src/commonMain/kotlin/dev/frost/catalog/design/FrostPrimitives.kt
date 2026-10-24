@@ -98,6 +98,8 @@ fun FrostRow(
     subtitle: String? = null,
     value: String? = null,
     indicator: FrostIndicator = FrostIndicator.None,
+    /** 值前面是否带一个小圆点（参考图"定位显示 ● 区/县"那一行） */
+    valueDot: Color? = null,
     switchOn: Boolean = false,
     accent: Color = FrostColor.accentGreen,
 ) {
@@ -119,6 +121,12 @@ fun FrostRow(
 
         if (value != null) {
             Spacer(Modifier.width(12.dp))
+            if (valueDot != null) {
+                Box(
+                    modifier = Modifier.size(8.dp).clip(CircleShape).background(valueDot),
+                )
+                Spacer(Modifier.width(6.dp))
+            }
             FrostText(value, FrostType.value, FrostColor.textSecondary)
         }
 
@@ -151,9 +159,11 @@ fun FrostSectionLabel(text: String) {
     Box(
         modifier =
             Modifier
+                // top 里已经含"上一张卡片后的组间距"：参考图实测组间 56.7dp
+                // = cardGap(18) + label 上下内边距(14+8) + 文字行高(16)
                 .padding(
                     start = FrostSize.sectionLabelStart,
-                    top = FrostSize.sectionLabelTop,
+                    top = FrostSize.cardGap + FrostSize.sectionLabelTop,
                     bottom = FrostSize.sectionLabelBottom,
                 ),
     ) {

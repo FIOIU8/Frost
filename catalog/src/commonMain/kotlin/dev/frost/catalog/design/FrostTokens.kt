@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.sp
  */
 object FrostColor {
     val bg = Color(0xFF000000)
-    val surface = Color(0xFF181818)
+    val surface = Color(0xFF1A1A1A)
 
     /** 弹层比卡片略亮一档，才能从遮罩里"浮"出来 */
     val surfaceElevated = Color(0xFF1F1F1F)
@@ -108,21 +108,21 @@ object FrostType {
 
 /** 尺寸，见 design-spec §4 */
 object FrostSize {
-    val screenPadding = 16.dp
-    val cardPadding = 16.dp
+    val screenPadding = 20.dp
+    val cardPadding = 20.dp
     val cardRadius = 22.dp
     val sheetRadius = 28.dp
     val iconRadius = 14.dp
 
-    val rowHeight = 56.dp
+    val rowHeight = 57.dp
     val rowHeightTwoLine = 72.dp
     val dividerThickness = 1.dp
-    val dividerInset = 16.dp
+    val dividerInset = 20.dp
 
-    val cardGap = 12.dp
-    val sectionLabelTop = 20.dp
-    val sectionLabelBottom = 6.dp
-    val sectionLabelStart = 20.dp
+    val cardGap = 18.dp
+    val sectionLabelTop = 14.dp
+    val sectionLabelBottom = 8.dp
+    val sectionLabelStart = 24.dp
 
     val pillHeight = 52.dp
     val switchWidth = 51.dp

@@ -49,6 +49,9 @@ kotlin {
             // 聚合构件 top.yukonga.miuix.kmp:miuix 只到 0.8.8，必须逐个子模块引用
             implementation(libs.bundles.miuix)
 
+            // 液态玻璃：Backdrop（Android 端真实背景模糊）。桌面端无捕获源，走回退。
+            implementation(libs.backdrop)
+
             // Compose 运行库版本由 libs.versions.toml 的 composeMultiplatform 决定（1.12.2），
             // 编译器插件版本跟随 Kotlin（2.4.21），两者由 CMP/Kotlin 插件各自保证
             implementation(libs.compose.runtime)
