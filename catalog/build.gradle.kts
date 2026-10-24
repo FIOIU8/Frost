@@ -106,6 +106,27 @@ tasks.register<JavaExec>("renderBaseline") {
         )
 }
 
+// 真实窗口截图：Window* 浮层（WindowDialog / WindowBottomSheet）走平台 Dialog（独立窗口），
+// 离屏渲染捕不到，只能开真窗口用 Robot 抓屏。本地运行；无头 CI 内部自动跳过（不失败）。
+tasks.register<JavaExec>("renderBaselineWindowed") {
+    group = "verification"
+    description = "真实窗口截取 Window* 浮层打开态（× 浅深各一张，短暂弹窗属预期）"
+    dependsOn("desktopJar")
+    mainClass.set("dev.frost.catalog.WindowShotKt")
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(jvmToolchainVersion))
+        },
+    )
+    classpath = files(tasks.named("desktopJar")) + configurations.getByName("desktopRuntimeClasspath")
+    args =
+        listOf(
+            rootProject.layout.projectDirectory
+                .dir("docs/baseline/p1")
+                .asFile.absolutePath,
+        )
+}
+
 // Desktop 运行注意：本工程编译目标是 JDK 21（toolchain），但 Gradle 自身可以跑在
 // JDK 17 上。若本机 JAVA_HOME=17，`:catalog:run` 会用 17 去启动 21 的 class，
 // 报 UnsupportedClassVersionError。两种解法，任选其一：

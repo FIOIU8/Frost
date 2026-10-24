@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.frost.catalog.rememberCatalogController
-import top.yukonga.miuix.kmp.basic.Surface
+import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.basic.Text
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 import top.yukonga.miuix.kmp.theme.ThemeController
@@ -19,6 +19,10 @@ import top.yukonga.miuix.kmp.theme.ThemeController
  *
  * 抽成独立 composable 的好处：离屏渲染（基线）与将来的 App 内页面共用同一套布局，
  * 不会出现"截图和真机长得不一样"的经典问题。
+ *
+ * 外壳必须是 Miuix [Scaffold] 而不是裸 Surface：Overlay* 浮层把 DialogState 注册进
+ * LocalDialogStates，由 Scaffold 消费渲染（实读 MiuixPopupUtils/Scaffold 源码确认）。
+ * 没有它，浮层静默不可见——离屏基线里 dialog 一节全空白就是踩的这条。
  */
 @Composable
 fun ShowcaseScreen(
@@ -26,10 +30,8 @@ fun ShowcaseScreen(
     controller: ThemeController = rememberCatalogController(),
 ) {
     MiuixTheme(controller = controller) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MiuixTheme.colorScheme.background,
-            shadowElevation = 0.dp,
+        Scaffold(
+            containerColor = MiuixTheme.colorScheme.background,
         ) {
             Column(
                 modifier =

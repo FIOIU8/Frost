@@ -20,6 +20,7 @@
 - 玻璃真模糊：`FrostGlassCard` 接 Backdrop 2.0.1（Android 31+ / 桌面 Skiko），无捕获源时回退半透明近似；`LocalFrostBackdrop` / `FrostGlassCapture` 接线原语与 `frost-glass-probe` 验证样张
 - 导航胶囊交互：图标槽（`FrostNavItem`）+ 长按拖动橡皮筋回弹（`frostRubberBand`，渐近 20dp，含性质单测）；返回键改纯圆玻璃按钮 `FrostBackButton`（40dp）
 - 悬浮感统一：暗色底部发光 / 亮色底部投影（`frostFloatingShadow`，Backdrop Shadow 挖洞光晕，Android 全 API 可用），覆盖玻璃卡、`FrostGlassCircle`、导航胶囊、悬浮弹窗（高一档）
+- 浮层与导航巡礼：Overlay*/Window* Dialog 与 BottomSheet 成对基线（新增 `renderBaselineWindowed` 真实窗口截图任务）、NavigationBar/NavigationRail/TabRow/TabRowWithContour；离屏渲染器改多帧推进并给 showcase 换上 Scaffold 浮层宿主
 
 ### Changed
 

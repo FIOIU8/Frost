@@ -1,8 +1,9 @@
 package dev.frost.catalog
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.renderComposeScene
+import androidx.compose.ui.ImageComposeScene
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.use
 import dev.frost.catalog.design.FrostFontProvider
 import dev.frost.catalog.design.FrostGlassProbeScreen
 import dev.frost.catalog.design.FrostListScreen
@@ -12,6 +13,7 @@ import dev.frost.catalog.design.FrostWeatherScreen
 import dev.frost.catalog.design.FrostWeatherSettingsScreen
 import dev.frost.catalog.showcase.ShowcaseScreen
 import dev.frost.catalog.showcase.showcaseSections
+import kotlinx.coroutines.Dispatchers
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import java.io.File
 
@@ -84,8 +86,27 @@ private fun renderTo(
     content: @Composable () -> Unit,
 ) {
     // density=3：物理像素 / 3 = 逻辑 dp，接近真实手机。按 1x 渲染会让组件小到看不清。
-    val image = renderComposeScene(width = width, height = height, density = Density(3f), content = content)
-    val data = image.encodeToData() ?: error("PNG 编码失败：$file")
-    file.writeBytes(data.bytes)
+    //
+    // 不能用单帧：Miuix 的浮层靠 LaunchedEffect 把内部 visible 从 false 翻成 true（首帧后
+    // 才执行），单帧快照永远拍不到打开态。所以用 ImageComposeScene 逐帧推进 45 帧
+    // （≈0.75s 虚拟时间，覆盖 dim 300ms tween + 入场 spring），落最后一帧。
+    val scene =
+        ImageComposeScene(
+            width = width,
+            height = height,
+            density = Density(3f),
+            coroutineContext = Dispatchers.Unconfined,
+            content = content,
+        )
+    scene.use {
+        var image: org.jetbrains.skia.Image? = null
+        repeat(BASELINE_FRAMES) { frame ->
+            image = scene.render(frame * 16_666_667L)
+        }
+        val data = (image ?: error("一帧都没渲染出来")).encodeToData() ?: error("PNG 编码失败：$file")
+        file.writeBytes(data.bytes)
+    }
     println("rendered: ${file.name} (${file.length()} bytes)")
 }
+
+private const val BASELINE_FRAMES = 45
