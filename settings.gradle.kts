@@ -27,5 +27,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "frost"
 
-// 模块在 P1 起逐步加入：:catalog（演示）、:frost-core、:frost-ui、:frost-glass …
-// P0 阶段保持"零模块骨架"，确保 ./gradlew build 能独立通过（Gate G0）。
+// P0：零模块骨架（已完成，Gate G0 绿）
+// P1：加入 :catalog 演示模块，用于验证 Miuix 依赖能否真实解析
+include(":catalog")

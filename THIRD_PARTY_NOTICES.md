@@ -8,7 +8,7 @@
 
 | 依赖名称 | 版权所有者 | 许可证 | 链接 |
 | --- | --- | --- | --- |
-| Miuix（`top.yukonga.miuix.kmp:*` 0.9.4，`miuix-ui` / `miuix-preference` / `miuix-icons` / `miuix-blur` / `miuix-squircle` / `miuix-nav` / `miuix-shader`） | 待填（P1 核对 POM `licenses` 与源码文件头） | Apache-2.0 | https://github.com/miuix-kotlin-multiplatform/miuix |
+| Miuix（`top.yukonga.miuix.kmp:*` 0.9.4，`miuix-ui` / `miuix-core` / `miuix-preference` / `miuix-icons` / `miuix-blur` / `miuix-squircle` / `miuix-nav` / `miuix-shader`） | 待填（P1 核对 POM `licenses` 与源码文件头） | Apache-2.0 | https://github.com/compose-miuix-ui/miuix |
 | Backdrop（`io.github.kyant0:backdrop` 2.0.1） | Kyant（待 P1 核对全称） | Apache-2.0 | https://github.com/Kyant0/AndroidLiquidGlass |
 | Shapes（`io.github.kyant0:shapes` 1.2.1，Backdrop 传递依赖） | Kyant（待 P1 核对全称） | Apache-2.0 | https://github.com/Kyant0/AndroidLiquidGlass |
 

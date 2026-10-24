@@ -45,6 +45,9 @@ miuix = ["miuix-ui", "miuix-preference", "miuix-icons", "miuix-blur", "miuix-sha
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+# AGP 9 起，KMP 模块必须用这个插件替代 com.android.library
+# （AGP ≥9.0 的 com.android.library 与 org.jetbrains.kotlin.multiplatform 不兼容）
+android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
