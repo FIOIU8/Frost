@@ -8,25 +8,33 @@ plugins {
     id("com.diffplug.spotless")
 }
 
+// 排除项分两类：
+//   generated —— 构建产物与工具内部状态（必须排除，否则会被"格式化"，且每次构建内容都变）
+//   localOnly —— 只在本机存在、不入库的目录（docs/ 计划书、.workbuddy/ 等 AI 目录）
+//               .gitignore 只管 git，管不到 spotless，这里必须显式排除
+val generated = listOf("**/build/**", "**/.gradle/**", "**/.git/**")
+val localOnly = listOf("docs/**", "**/.workbuddy/**")
+val excluded = (generated + localOnly).toTypedArray()
+
 extensions.configure<SpotlessExtension> {
     // Kotlin 源码
     kotlin {
         target("**/*.kt")
-        targetExclude("**/build/**", "**/.gradle/**", "docs/**")
+        targetExclude(*excluded)
         ktlint()
     }
 
     // Gradle 构建脚本（含 build-logic 的预编译脚本）
     kotlinGradle {
         target("**/*.gradle.kts")
-        targetExclude("**/build/**", "**/.gradle/**")
+        targetExclude(*excluded)
         ktlint()
     }
 
     // 配置与文档类文本
     format("misc") {
         target("**/*.md", "**/*.yml", "**/*.yaml", "**/*.toml", "**/*.properties")
-        targetExclude("**/build/**", "**/.gradle/**", "docs/**")
+        targetExclude(*excluded)
         trimTrailingWhitespace()
         endWithNewline()
     }
