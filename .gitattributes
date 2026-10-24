@@ -1,0 +1,50 @@
+# ============================================================
+# Frost — Git 属性
+# 原则：仓库内文本一律 LF；Windows 脚本保留 CRLF；二进制不做转换
+# ============================================================
+
+* text=auto eol=lf
+
+# ---- 显式声明为文本（避免被误判为二进制） ----
+*.kt        text
+*.kts       text
+*.java      text
+*.xml       text
+*.toml      text
+*.md        text
+*.json      text
+*.yml       text
+*.yaml      text
+*.pro       text
+*.properties text
+.gitignore  text
+.gitattributes text
+
+# ---- Windows 脚本需要 CRLF ----
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+*.ps1       text eol=crlf
+gradlew     text eol=lf
+
+# ---- 二进制（禁止 EOL 转换与 diff） ----
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.webp      binary
+*.gif       binary
+*.ico       binary
+*.ttf       binary
+*.otf       binary
+*.woff      binary
+*.woff2     binary
+*.jar       binary
+*.aar       binary
+*.so        binary
+*.dylib     binary
+*.dll       binary
+*.keystore  binary
+*.jks       binary
+*.zip       binary
+
+# ---- 语言统计忽略 ----
+*.lock      linguist-generated=true

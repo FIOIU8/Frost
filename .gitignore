@@ -1,0 +1,66 @@
+# ============================================================
+# Frost — 本地资料与 AI Agent（不入库）
+# ============================================================
+/docs/
+/.workbuddy/
+/.claude/
+/.cursor/
+/.codex/
+/.agents/
+/.ai/
+/.specstory/
+/.continue/
+/.aider*
+CLAUDE.md
+AGENTS.md
+
+# ============================================================
+# Gradle / Kotlin / Android
+# ============================================================
+.gradle/
+build/
+**/build/
+!src/**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+*.hprof
+*.jks
+*.keystore
+!debug.keystore
+kotlin-js-store/
+.kotlin/
+
+# ============================================================
+# IDE
+# ============================================================
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.log
+
+# ============================================================
+# 构建产物 / 发布
+# ============================================================
+*.aar
+*.apk
+*.aab
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+out/
+dist/
+publish/
+.maven-local/
+
+# ============================================================
+# 测试与基准
+# ============================================================
+**/screenshots/
+!**/screenshots/.gitkeep
+*.exec
