@@ -22,3 +22,5 @@ end_of_line = crlf
 # 与 ktlint 默认规则保持一致
 ij_kotlin_allow_trailing_comma = true
 ij_kotlin_allow_trailing_comma_on_call_site = true
+# Compose 约定：@Composable 函数用 PascalCase（ktlint 默认要求 camelCase，需显式放行）
+ktlint_function_naming_ignore_when_annotated_with = Composable
