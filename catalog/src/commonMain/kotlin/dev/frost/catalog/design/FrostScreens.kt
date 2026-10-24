@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.fillMaxSize as fillMax
@@ -33,36 +32,38 @@ import androidx.compose.foundation.layout.fillMaxSize as fillMax
  */
 @Composable
 fun FrostSettingsScreen(accent: Color = FrostColor.accentRed) {
-    Column(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(FrostGradient.pageDark))) {
-        FrostNavBar("设置")
-        Spacer(Modifier.height(6.dp))
+    FrostPageBackground {
+        Column(modifier = Modifier.fillMaxSize()) {
+            FrostNavBar("设置")
+            Spacer(Modifier.height(6.dp))
 
-        FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-            FrostRow("录音云同步", value = "未开启", indicator = FrostIndicator.Chevron)
-            FrostRowDivider()
-            FrostRow("录音文件格式", value = "MP3", indicator = FrostIndicator.Picker)
-            FrostRowDivider()
-            FrostRow("录音模式", value = "标准模式", indicator = FrostIndicator.Picker)
-        }
+            FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                FrostRow("录音云同步", value = "未开启", indicator = FrostIndicator.Chevron)
+                FrostRowDivider()
+                FrostRow("录音文件格式", value = "MP3", indicator = FrostIndicator.Picker)
+                FrostRowDivider()
+                FrostRow("录音模式", value = "标准模式", indicator = FrostIndicator.Picker)
+            }
 
-        FrostSectionLabel("AI 录音")
+            FrostSectionLabel("AI 录音")
 
-        FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-            FrostRow("默认声源语言", value = "简体中文", indicator = FrostIndicator.Picker)
-            FrostRowDivider()
-            FrostRow(
-                title = "AI 录音助手",
-                subtitle = "录音时自动开启实时转写（本月剩余 100/100 分钟，每月1日0点刷新）",
-                indicator = FrostIndicator.Switch,
-                switchOn = true,
-                accent = accent,
-            )
-        }
+            FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                FrostRow("默认声源语言", value = "简体中文", indicator = FrostIndicator.Picker)
+                FrostRowDivider()
+                FrostRow(
+                    title = "AI 录音助手",
+                    subtitle = "录音时自动开启实时转写（本月剩余 100/100 分钟，每月1日0点刷新）",
+                    indicator = FrostIndicator.Switch,
+                    switchOn = true,
+                    accent = accent,
+                )
+            }
 
-        Spacer(Modifier.height(FrostSize.cardGap))
+            Spacer(Modifier.height(FrostSize.cardGap))
 
-        FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-            FrostRow("第三方信息共享清单", indicator = FrostIndicator.Chevron)
+            FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                FrostRow("第三方信息共享清单", indicator = FrostIndicator.Chevron)
+            }
         }
     }
 }
@@ -133,7 +134,8 @@ fun FrostOptionDialog(
 /** 设置页 + 打开状态的悬浮窗（参考图 1 的整体效果） */
 @Composable
 fun FrostSettingsWithDialog(accent: Color = FrostColor.accentRed) {
-    Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(FrostGradient.pageDark))) {
+    // 背景渐变由 FrostSettingsScreen 自己的 FrostPageBackground 提供，这里只叠遮罩与浮层
+    Box(modifier = Modifier.fillMaxSize()) {
         FrostSettingsScreen(accent)
         Box(modifier = Modifier.fillMaxSize().background(Color(0x8C000000)))
         FrostOptionDialog(
@@ -154,97 +156,99 @@ fun FrostSettingsWithDialog(accent: Color = FrostColor.accentRed) {
 /** 参考图 4 的复刻：列表页（大标题 + 筛选 chip + 分组项 + 圆形播放） */
 @Composable
 fun FrostListScreen(accent: Color = FrostColor.accentBlue) {
-    Column(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(FrostGradient.pageDark))) {
-        Spacer(Modifier.height(FrostSize.screenPadding))
+    FrostPageBackground {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Spacer(Modifier.height(FrostSize.screenPadding))
 
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = FrostSize.screenPadding),
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                FrostText("录音", FrostType.display)
-                Spacer(Modifier.height(2.dp))
-                FrostText("338 个通话录音", FrostType.rowSubtitle, FrostColor.textSecondary)
-            }
-            FrostText("⌕", FrostType.navTitle, FrostColor.textPrimary)
-            Spacer(Modifier.width(18.dp))
-            FrostText("⋮", FrostType.navTitle, FrostColor.textPrimary)
-        }
-
-        Spacer(Modifier.height(14.dp))
-
-        // 筛选 chips
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = FrostSize.screenPadding),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            FrostChip("全部录音", selected = true, accent = accent)
-            FrostChip("通话录音", selected = false, accent = accent)
-            FrostChip("普通录音", selected = false, accent = accent)
-        }
-
-        Spacer(Modifier.height(FrostSize.cardGap))
-
-        // 提示横幅
-        Row(
-            modifier =
-                Modifier
-                    .padding(horizontal = FrostSize.screenPadding)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(FrostSize.cardRadius))
-                    .background(FrostColor.surface)
-                    .padding(horizontal = FrostSize.cardPadding, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            FrostText("开启录音自动同步，保障录音数据安全", FrostType.rowSubtitle, FrostColor.textSecondary)
-            Spacer(Modifier.weight(1f))
-            FrostPillButtonCompact("开启", accent)
-        }
-
-        Spacer(Modifier.height(FrostSize.cardGap))
-
-        val items =
-            listOf(
-                Triple("20260727233713.aac", "QQ-20260727233713", "7/27 23:59 · 00:21:52"),
-                Triple("20250324201935.mp3", "QQ-20250324201935", "2025/3/24 20:47 · 00:28:01"),
-                Triple("20250323213351.mp3", "QQ-20250323213351", "2025/3/23 21:33 · 00:00:05"),
-            )
-
-        items.forEachIndexed { index, item ->
-            Column(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    FrostCountBadge(2, FrostColor.badgeColors[index % FrostColor.badgeColors.size])
-                    Spacer(Modifier.width(8.dp))
-                    FrostText(item.first, FrostType.rowSubtitle, FrostColor.textSecondary)
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = FrostSize.screenPadding),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    FrostText("录音", FrostType.display)
+                    Spacer(Modifier.height(2.dp))
+                    FrostText("338 个通话录音", FrostType.rowSubtitle, FrostColor.textSecondary)
                 }
-                Spacer(Modifier.height(6.dp))
-                Row(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(FrostSize.cardRadius))
-                            .background(FrostColor.surface)
-                            .padding(start = FrostSize.cardPadding, end = 8.dp, top = 8.dp, bottom = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        FrostText(item.second, FrostType.rowTitle)
-                        Spacer(Modifier.height(3.dp))
-                        FrostText(item.third, FrostType.rowSubtitle, FrostColor.textSecondary)
+                FrostText("⌕", FrostType.navTitle, FrostColor.textPrimary)
+                Spacer(Modifier.width(18.dp))
+                FrostText("⋮", FrostType.navTitle, FrostColor.textPrimary)
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            // 筛选 chips
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = FrostSize.screenPadding),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FrostChip("全部录音", selected = true, accent = accent)
+                FrostChip("通话录音", selected = false, accent = accent)
+                FrostChip("普通录音", selected = false, accent = accent)
+            }
+
+            Spacer(Modifier.height(FrostSize.cardGap))
+
+            // 提示横幅
+            Row(
+                modifier =
+                    Modifier
+                        .padding(horizontal = FrostSize.screenPadding)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(FrostSize.cardRadius))
+                        .background(FrostColor.surface)
+                        .padding(horizontal = FrostSize.cardPadding, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                FrostText("开启录音自动同步，保障录音数据安全", FrostType.rowSubtitle, FrostColor.textSecondary)
+                Spacer(Modifier.weight(1f))
+                FrostPillButtonCompact("开启", accent)
+            }
+
+            Spacer(Modifier.height(FrostSize.cardGap))
+
+            val items =
+                listOf(
+                    Triple("20260727233713.aac", "QQ-20260727233713", "7/27 23:59 · 00:21:52"),
+                    Triple("20250324201935.mp3", "QQ-20250324201935", "2025/3/24 20:47 · 00:28:01"),
+                    Triple("20250323213351.mp3", "QQ-20250323213351", "2025/3/23 21:33 · 00:00:05"),
+                )
+
+            items.forEachIndexed { index, item ->
+                Column(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        FrostCountBadge(2, FrostColor.badgeColors[index % FrostColor.badgeColors.size])
+                        Spacer(Modifier.width(8.dp))
+                        FrostText(item.first, FrostType.rowSubtitle, FrostColor.textSecondary)
                     }
-                    Box(
+                    Spacer(Modifier.height(6.dp))
+                    Row(
                         modifier =
                             Modifier
-                                .size(FrostSize.playButton)
-                                .clip(CircleShape)
-                                .background(FrostColor.surfacePressed),
-                        contentAlignment = Alignment.Center,
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(FrostSize.cardRadius))
+                                .background(FrostColor.surface)
+                                .padding(start = FrostSize.cardPadding, end = 8.dp, top = 8.dp, bottom = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        FrostText("▸", FrostType.navTitle, FrostColor.textPrimary)
+                        Column(modifier = Modifier.weight(1f)) {
+                            FrostText(item.second, FrostType.rowTitle)
+                            Spacer(Modifier.height(3.dp))
+                            FrostText(item.third, FrostType.rowSubtitle, FrostColor.textSecondary)
+                        }
+                        Box(
+                            modifier =
+                                Modifier
+                                    .size(FrostSize.playButton)
+                                    .clip(CircleShape)
+                                    .background(FrostColor.surfacePressed),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            FrostText("▸", FrostType.navTitle, FrostColor.textPrimary)
+                        }
                     }
+                    Spacer(Modifier.height(14.dp))
                 }
-                Spacer(Modifier.height(14.dp))
             }
         }
     }

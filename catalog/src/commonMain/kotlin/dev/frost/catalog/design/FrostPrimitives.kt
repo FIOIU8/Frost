@@ -1,7 +1,10 @@
 package dev.frost.catalog.design
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,19 +24,31 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
 import com.kyant.backdrop.effects.blur
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
+import kotlin.math.tanh
 
 /** 文本原语：唯一允许写 Text 的地方，其它组件都调它。 */
 @Composable
@@ -278,15 +294,51 @@ fun FrostCountBadge(
 }
 
 /**
- * 返回箭头：Canvas 手绘。
+ * 返回键：**纯圆**图标按钮（用户 2026-10-24 裁决，对齐 AndroidLiquidGlass 的圆形按钮）。
  *
- * 为什么不用 "←" 字形：字形的高度远小于参考图（参考 63×58px，字形只有 25px 高），
- * 会导致标题整体左移，靠调字号永远对不上。用两条线 + 一个折角反而精确。
+ * 材质走玻璃语义：有捕获源时真模糊，否则半透明填充；描边统一 1dp glassStroke。
+ * 箭头保持 Canvas 手绘（字形比例对不上参考，见 git 历史里 FrostBackArrow 的校准记录）。
  */
 @Composable
-fun FrostBackArrow(
+fun FrostBackButton(
+    modifier: Modifier = Modifier,
     color: Color = FrostColor.textPrimary,
-    boxSize: Dp = 24.dp,
+) {
+    val shape = CircleShape
+    val backdrop = LocalFrostBackdrop.current
+    val base =
+        if (backdrop == null) {
+            Modifier
+                .clip(shape)
+                .background(FrostGradient.glassFill)
+        } else {
+            Modifier.drawBackdrop(
+                backdrop = backdrop,
+                shape = { shape },
+                effects = { blur(FrostSize.glassBlur.toPx()) },
+                highlight = null,
+                shadow = null,
+                onDrawSurface = { drawRect(FrostGradient.glassFill) },
+            )
+        }
+    Box(
+        modifier =
+            modifier
+                .then(base)
+                .size(FrostSize.circleIcon)
+                .border(1.dp, FrostGradient.glassStroke, shape),
+        contentAlignment = Alignment.Center,
+    ) {
+        // 箭头占圆的 ~1/2，与参考图 63×58px@3x（21×19dp）的比例一致
+        FrostArrowGlyph(color = color, boxSize = FrostSize.circleIcon / 2)
+    }
+}
+
+/** 返回箭头图形：两条线 + 一个折角。字形画不出参考比例，只能手绘。 */
+@Composable
+private fun FrostArrowGlyph(
+    color: Color,
+    boxSize: Dp,
 ) {
     androidx.compose.foundation.Canvas(Modifier.size(boxSize)) {
         val w = size.width
@@ -329,7 +381,7 @@ fun FrostBackArrow(
     }
 }
 
-/** 顶栏：返回箭头 + 标题（居中偏左）。 */
+/** 顶栏：返回键（纯圆）+ 标题（居中偏左）。 */
 @Composable
 fun FrostNavBar(title: String) {
     Row(
@@ -339,10 +391,8 @@ fun FrostNavBar(title: String) {
                 .padding(horizontal = FrostSize.screenPadding, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // 参考图箭头实测 63×58px（21×19dp）。用字形画不出这个比例，改为 Canvas 绘制
-        FrostBackArrow()
-        // 箭头右端到标题左端实测 66px ≈ 22dp
-        Spacer(Modifier.width(22.dp))
+        FrostBackButton()
+        Spacer(Modifier.width(14.dp))
         FrostText(title, FrostType.navTitle)
     }
 }
@@ -455,26 +505,97 @@ fun FrostGradientBar(
     )
 }
 
-/** 底部悬浮胶囊导航（磨砂白 + 深色图标），浮在内容之上 */
+/** 导航胶囊的单项：图标（业务自绘）+ 文字。图标为 null 时退回占位菱形。 */
+data class FrostNavItem(
+    val label: String,
+    val icon: (@Composable () -> Unit)? = null,
+)
+
+/**
+ * 橡皮筋位移：拖得多、走得少，渐近 [max] 而永不超过。
+ *
+ * 数学性质（有单测）：x=0 → 0；小位移近似线性；x→∞ 渐近 max；单调、保号。
+ * 手感参考 iOS 的 rubber band，"只能拉动一点点，松手弹回去"。
+ */
+internal fun frostRubberBand(
+    raw: Float,
+    max: Float,
+): Float = if (raw == 0f || max <= 0f) 0f else max * tanh(raw / max)
+
+/**
+ * 底部悬浮胶囊导航。
+ *
+ * 材质：**磨砂白实心，不做玻璃**（用户 2026-10-24 裁决——虽然现在有 Backdrop 能力了，
+ * 这个组件也不用）；圆角 = 完整胶囊（参考图实测圆角 ≈ 半高）。
+ *
+ * 交互：**长按后可拖动**，位移经 [frostRubberBand] 压缩（不跟手，像拉皮筋），
+ * 松手用弹簧动画弹回原位。位移走 `offset`（placement 阶段），不触发重排。
+ */
 @Composable
 fun FrostFloatingNavPill(
-    items: List<String>,
+    items: List<FrostNavItem>,
     modifier: Modifier = Modifier,
 ) {
+    val scope = rememberCoroutineScope()
+    val haptics = LocalHapticFeedback.current
+    val offsetX = remember { Animatable(0f) }
+    val offsetY = remember { Animatable(0f) }
+    // 长按拖拽期间记录的"原始手指位移"（未经橡皮筋压缩）
+    var rawX by remember { mutableStateOf(0f) }
+    var rawY by remember { mutableStateOf(0f) }
+
+    fun springBack() {
+        rawX = 0f
+        rawY = 0f
+        scope.launch {
+            launch { offsetX.animateTo(0f, spring(dampingRatio = 0.55f, stiffness = 380f)) }
+            launch { offsetY.animateTo(0f, spring(dampingRatio = 0.55f, stiffness = 380f)) }
+        }
+    }
+
+    val dragModifier =
+        Modifier.pointerInput(items) {
+            detectDragGesturesAfterLongPress(
+                onDragStart = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    rawX = 0f
+                    rawY = 0f
+                    scope.launch { offsetX.snapTo(0f) }
+                    scope.launch { offsetY.snapTo(0f) }
+                },
+                onDrag = { change, amount ->
+                    change.consume()
+                    rawX += amount.x
+                    rawY += amount.y
+                    val max = FrostSize.navDragMax.toPx()
+                    scope.launch { offsetX.snapTo(frostRubberBand(rawX, max)) }
+                    scope.launch { offsetY.snapTo(frostRubberBand(rawY, max)) }
+                },
+                onDragEnd = { springBack() },
+                onDragCancel = { springBack() },
+            )
+        }
+
     Row(
         modifier =
             modifier
+                .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
+                .then(dragModifier)
                 .clip(CircleShape)
                 .background(FrostGradient.navPillFill)
                 .padding(horizontal = 28.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(36.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        items.forEach { label ->
+        items.forEach { item ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                FrostText("◆", FrostType.rowTitle, Color(0xFF111111))
+                if (item.icon != null) {
+                    item.icon()
+                } else {
+                    FrostText("◆", FrostType.rowTitle, FrostColor.onNavPill)
+                }
                 Spacer(Modifier.height(2.dp))
-                FrostText(label, FrostType.sectionLabel, Color(0xFF111111))
+                FrostText(item.label, FrostType.sectionLabel, FrostColor.onNavPill)
             }
         }
     }

@@ -65,6 +65,11 @@ kotlin {
         getByName("desktopMain").dependencies {
             implementation(compose.desktop.currentOs)
         }
+
+        // desktopTest：纯数学/逻辑的单测（如橡皮筋位移曲线），CI 的 build 会一并执行
+        getByName("desktopTest").dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 

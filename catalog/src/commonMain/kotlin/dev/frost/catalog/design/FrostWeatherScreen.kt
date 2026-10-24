@@ -126,9 +126,15 @@ fun FrostWeatherScreen() {
 
                 Spacer(Modifier.weight(1f))
 
-                // 底部悬浮胶囊导航：磨砂白，浮在渐变之上
+                // 底部悬浮胶囊导航：磨砂白实心（非玻璃），图标按用户参考图手绘
                 Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                    FrostFloatingNavPill(listOf("首页", "实用工具"))
+                    FrostFloatingNavPill(
+                        items =
+                            listOf(
+                                FrostNavItem("首页") { FrostShieldBoltIcon() },
+                                FrostNavItem("实用工具") { FrostGridIcon() },
+                            ),
+                    )
                 }
                 Spacer(Modifier.height(18.dp))
             }
@@ -141,11 +147,78 @@ private fun FrostCircleIcon(glyph: String) {
     Box(
         modifier =
             Modifier
-                .size(40.dp)
+                .size(FrostSize.circleIcon)
                 .clip(CircleShape)
                 .background(FrostGradient.glassFill),
         contentAlignment = Alignment.Center,
     ) {
         FrostText(glyph, FrostType.value, Color.White)
+    }
+}
+
+/**
+ * 参考图（用户 2026-10-24 截图）里的"首页"图标：实心盾牌 + 白色闪电。
+ * 业务图标，demo 用 Canvas 手绘；正式图标集是另一件事（Miuix icons / 自绘库）。
+ */
+@Composable
+private fun FrostShieldBoltIcon() {
+    androidx.compose.foundation.Canvas(Modifier.size(FrostSize.navIcon)) {
+        val w = size.width
+        val h = size.height
+        val ink = FrostColor.onNavPill
+        // 盾牌：宽顶、圆肩、收底尖
+        val shield =
+            androidx.compose.ui.graphics.Path().apply {
+                moveTo(w * 0.50f, h * 0.06f)
+                cubicTo(w * 0.38f, h * 0.14f, w * 0.24f, h * 0.19f, w * 0.14f, h * 0.21f)
+                lineTo(w * 0.14f, h * 0.48f)
+                cubicTo(w * 0.14f, h * 0.70f, w * 0.30f, h * 0.86f, w * 0.50f, h * 0.95f)
+                cubicTo(w * 0.70f, h * 0.86f, w * 0.86f, h * 0.70f, w * 0.86f, h * 0.48f)
+                lineTo(w * 0.86f, h * 0.21f)
+                cubicTo(w * 0.76f, h * 0.19f, w * 0.62f, h * 0.14f, w * 0.50f, h * 0.06f)
+                close()
+            }
+        drawPath(shield, ink)
+        // 闪电（挖白）
+        val bolt =
+            androidx.compose.ui.graphics.Path().apply {
+                moveTo(w * 0.56f, h * 0.26f)
+                lineTo(w * 0.38f, h * 0.53f)
+                lineTo(w * 0.49f, h * 0.53f)
+                lineTo(w * 0.44f, h * 0.74f)
+                lineTo(w * 0.62f, h * 0.46f)
+                lineTo(w * 0.51f, h * 0.46f)
+                lineTo(w * 0.56f, h * 0.26f)
+                close()
+            }
+        drawPath(bolt, FrostColor.switchThumb)
+    }
+}
+
+/** 参考图里的"实用工具"图标：2×2 圆角方块。 */
+@Composable
+private fun FrostGridIcon() {
+    androidx.compose.foundation.Canvas(Modifier.size(FrostSize.navIcon)) {
+        val w = size.width
+        val cell = w * 0.42f
+        val gap = w - cell * 2f
+        val radius = cell * 0.32f
+        val ink = FrostColor.onNavPill
+        listOf(0f, 1f).forEach { cx ->
+            listOf(0f, 1f).forEach { cy ->
+                drawRoundRect(
+                    color = ink,
+                    topLeft =
+                        androidx.compose.ui.geometry
+                            .Offset(cx * (cell + gap), cy * (cell + gap)),
+                    size =
+                        androidx.compose.ui.geometry
+                            .Size(cell, cell),
+                    cornerRadius =
+                        androidx.compose.ui.geometry
+                            .CornerRadius(radius, radius),
+                )
+            }
+        }
     }
 }

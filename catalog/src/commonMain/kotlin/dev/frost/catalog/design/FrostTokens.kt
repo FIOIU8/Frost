@@ -33,6 +33,9 @@ object FrostColor {
     val dialogStroke = Color(0xFF333333)
     val switchThumb = Color(0xFFFFFFFF)
 
+    /** 磨砂白胶囊上的内容色（图标/文字），参考图取近黑 */
+    val onNavPill = Color(0xFF111111)
+
     /** 强调色：由业务选，结构不变（对应 ThemeController(keyColor) 的模型） */
     val accentRed = Color(0xFFF86860)
     val accentBlue = Color(0xFF1888F8)
@@ -136,4 +139,13 @@ object FrostSize {
     val radioDot = 12.dp
     val badgeSize = 28.dp
     val playButton = 56.dp
+
+    /** 纯圆按钮直径（返回键、圆形图标位），参考 AndroidLiquidGlass 的圆形按钮 */
+    val circleIcon = 40.dp
+
+    /** 导航胶囊里的图标边长（参考图实测 ≈ 胶囊高度的 1/3） */
+    val navIcon = 24.dp
+
+    /** 导航胶囊橡皮筋拖拽的渐近上限：再怎么拉，位移也不会超过它（见 frostRubberBand） */
+    val navDragMax = 20.dp
 }

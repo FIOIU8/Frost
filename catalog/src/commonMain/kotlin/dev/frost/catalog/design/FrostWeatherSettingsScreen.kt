@@ -1,6 +1,5 @@
 package dev.frost.catalog.design
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -27,52 +25,54 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun FrostWeatherSettingsScreen() {
-    Column(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(FrostGradient.pageDark))) {
-        FrostNavBar("设置")
-        Spacer(Modifier.height(10.dp))
+    FrostPageBackground {
+        Column(modifier = Modifier.fillMaxSize()) {
+            FrostNavBar("设置")
+            Spacer(Modifier.height(10.dp))
 
-        // 组 1：单行
-        FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-            FrostRow(
-                title = "定位显示",
-                value = "区/县",
-                valueDot = Color(0xFFF86860),
-                indicator = FrostIndicator.Chevron,
-            )
+            // 组 1：单行
+            FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                FrostRow(
+                    title = "定位显示",
+                    value = "区/县",
+                    valueDot = Color(0xFFF86860),
+                    indicator = FrostIndicator.Chevron,
+                )
+            }
+
+            FrostSectionLabel("天气提醒")
+            FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                FrostRow("定位城市提醒", indicator = FrostIndicator.Chevron)
+                FrostRowDivider()
+                FrostRow("特别关注城市提醒", indicator = FrostIndicator.Chevron)
+            }
+
+            FrostSectionLabel("单位")
+            FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                FrostRow("温度", value = "℃ - 摄氏度", indicator = FrostIndicator.Picker)
+                FrostRowDivider()
+                FrostRow("风力", value = "蒲福风力等级", indicator = FrostIndicator.Picker)
+                FrostRowDivider()
+                FrostRow("气压", value = "hPa - 百帕", indicator = FrostIndicator.Picker)
+                FrostRowDivider()
+                FrostRow("能见度", value = "km - 千米", indicator = FrostIndicator.Picker)
+            }
+
+            Spacer(Modifier.height(FrostSize.cardGap))
+
+            FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
+                FrostRow("用户体验计划", indicator = FrostIndicator.Chevron)
+                FrostRowDivider()
+                FrostRow("关于天气", indicator = FrostIndicator.Chevron)
+                FrostRowDivider()
+                FrostRow("收集个人信息明示清单", indicator = FrostIndicator.Chevron)
+                FrostRowDivider()
+                FrostRow("第三方信息共享清单", indicator = FrostIndicator.Chevron)
+                FrostRowDivider()
+                FrostRow("隐私", indicator = FrostIndicator.Chevron)
+            }
+
+            Spacer(Modifier.height(24.dp))
         }
-
-        FrostSectionLabel("天气提醒")
-        FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-            FrostRow("定位城市提醒", indicator = FrostIndicator.Chevron)
-            FrostRowDivider()
-            FrostRow("特别关注城市提醒", indicator = FrostIndicator.Chevron)
-        }
-
-        FrostSectionLabel("单位")
-        FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-            FrostRow("温度", value = "℃ - 摄氏度", indicator = FrostIndicator.Picker)
-            FrostRowDivider()
-            FrostRow("风力", value = "蒲福风力等级", indicator = FrostIndicator.Picker)
-            FrostRowDivider()
-            FrostRow("气压", value = "hPa - 百帕", indicator = FrostIndicator.Picker)
-            FrostRowDivider()
-            FrostRow("能见度", value = "km - 千米", indicator = FrostIndicator.Picker)
-        }
-
-        Spacer(Modifier.height(FrostSize.cardGap))
-
-        FrostCard(modifier = Modifier.padding(horizontal = FrostSize.screenPadding)) {
-            FrostRow("用户体验计划", indicator = FrostIndicator.Chevron)
-            FrostRowDivider()
-            FrostRow("关于天气", indicator = FrostIndicator.Chevron)
-            FrostRowDivider()
-            FrostRow("收集个人信息明示清单", indicator = FrostIndicator.Chevron)
-            FrostRowDivider()
-            FrostRow("第三方信息共享清单", indicator = FrostIndicator.Chevron)
-            FrostRowDivider()
-            FrostRow("隐私", indicator = FrostIndicator.Chevron)
-        }
-
-        Spacer(Modifier.height(24.dp))
     }
 }
