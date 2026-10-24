@@ -144,14 +144,7 @@ fun FrostWeatherScreen() {
 
 @Composable
 private fun FrostCircleIcon(glyph: String) {
-    Box(
-        modifier =
-            Modifier
-                .size(FrostSize.circleIcon)
-                .clip(CircleShape)
-                .background(FrostGradient.glassFill),
-        contentAlignment = Alignment.Center,
-    ) {
+    FrostGlassCircle(size = FrostSize.circleIcon) {
         FrostText(glyph, FrostType.value, Color.White)
     }
 }

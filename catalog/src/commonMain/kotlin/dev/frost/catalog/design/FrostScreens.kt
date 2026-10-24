@@ -19,9 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.kyant.backdrop.backdrops.emptyBackdrop
+import com.kyant.backdrop.drawBackdrop
 import androidx.compose.foundation.layout.fillMaxSize as fillMax
 
 /**
@@ -75,7 +76,8 @@ fun FrostSettingsScreen(accent: Color = FrostColor.accentRed) {
  * 四个角都是圆的（28dp），下方还能露出被遮住页面的一行内容。
  * 这是"悬浮窗"与"bottom sheet"最本质的区别，不能做成贴底 + 只有上面两角圆。
  *
- * 另外这里加了 1dp 描边 + 阴影：dark 主题下没有阴影的话，浮层会和背景糊在一起。
+ * 悬浮感（用户 2026-10-24 裁决）：走 [frostFloatingShadow]（暗色底部发光 / 亮色底部投影），
+ * 比 [dev.frost.catalog.design.FrostGlassCard] 高一档（elevated）；1dp 描边保留。
  */
 @Composable
 fun FrostOptionDialog(
@@ -86,15 +88,20 @@ fun FrostOptionDialog(
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(FrostSize.sheetRadius)
+    val isDark = LocalFrostIsDark.current
     Column(
         modifier =
             modifier
                 .padding(horizontal = 12.dp, vertical = 24.dp)
                 .fillMaxWidth()
-                .shadow(elevation = 24.dp, shape = shape, clip = false)
-                .clip(shape)
-                .background(FrostColor.surfaceElevated)
-                .border(1.dp, FrostColor.dialogStroke, shape)
+                .drawBackdrop(
+                    backdrop = emptyBackdrop(),
+                    shape = { shape },
+                    effects = {},
+                    highlight = null,
+                    shadow = { frostFloatingShadow(isDark, elevated = true) },
+                    onDrawSurface = { drawRect(FrostColor.surfaceElevated) },
+                ).border(1.dp, FrostColor.dialogStroke, shape)
                 .padding(horizontal = 20.dp, vertical = 14.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {

@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kyant.backdrop.backdrops.emptyBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.drawBackdrop
@@ -294,9 +296,44 @@ fun FrostCountBadge(
 }
 
 /**
+ * 玻璃圆钮：[FrostBackButton] 与天气页圆形图标位共用的"纯圆玻璃"原语。
+ *
+ * 单路径 `drawBackdrop`：有捕获源真模糊，否则 `emptyBackdrop()`（其余外观一致）；
+ * 带 [frostFloatingShadow] 悬浮感（暗色底部发光 / 亮色底部投影）。
+ */
+@Composable
+fun FrostGlassCircle(
+    size: Dp,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
+    val shape = CircleShape
+    val backdrop = LocalFrostBackdrop.current
+    val isDark = LocalFrostIsDark.current
+    Box(
+        modifier =
+            modifier
+                .drawBackdrop(
+                    backdrop = backdrop ?: emptyBackdrop(),
+                    shape = { shape },
+                    effects = {
+                        if (backdrop != null) {
+                            blur(FrostSize.glassBlur.toPx())
+                        }
+                    },
+                    highlight = null,
+                    shadow = { frostFloatingShadow(isDark) },
+                    onDrawSurface = { drawRect(FrostGradient.glassFill) },
+                ).size(size)
+                .border(1.dp, FrostGradient.glassStroke, shape),
+        contentAlignment = Alignment.Center,
+        content = content,
+    )
+}
+
+/**
  * 返回键：**纯圆**图标按钮（用户 2026-10-24 裁决，对齐 AndroidLiquidGlass 的圆形按钮）。
  *
- * 材质走玻璃语义：有捕获源时真模糊，否则半透明填充；描边统一 1dp glassStroke。
  * 箭头保持 Canvas 手绘（字形比例对不上参考，见 git 历史里 FrostBackArrow 的校准记录）。
  */
 @Composable
@@ -304,30 +341,9 @@ fun FrostBackButton(
     modifier: Modifier = Modifier,
     color: Color = FrostColor.textPrimary,
 ) {
-    val shape = CircleShape
-    val backdrop = LocalFrostBackdrop.current
-    val base =
-        if (backdrop == null) {
-            Modifier
-                .clip(shape)
-                .background(FrostGradient.glassFill)
-        } else {
-            Modifier.drawBackdrop(
-                backdrop = backdrop,
-                shape = { shape },
-                effects = { blur(FrostSize.glassBlur.toPx()) },
-                highlight = null,
-                shadow = null,
-                onDrawSurface = { drawRect(FrostGradient.glassFill) },
-            )
-        }
-    Box(
-        modifier =
-            modifier
-                .then(base)
-                .size(FrostSize.circleIcon)
-                .border(1.dp, FrostGradient.glassStroke, shape),
-        contentAlignment = Alignment.Center,
+    FrostGlassCircle(
+        size = FrostSize.circleIcon,
+        modifier = modifier,
     ) {
         // 箭头占圆的 ~1/2，与参考图 63×58px@3x（21×19dp）的比例一致
         FrostArrowGlyph(color = color, boxSize = FrostSize.circleIcon / 2)
@@ -443,11 +459,12 @@ fun FrostPageBackground(
 }
 
 /**
- * 玻璃卡片：半透明填充 + 1dp 描边 + **真实背景模糊**（Backdrop 2.0.1 接线，2026-10-24 起）。
+ * 玻璃卡片：半透明填充 + 1dp 描边 + **真实背景模糊**（Backdrop 2.0.1）+ **悬浮感**
+ * （暗色底部发光 / 亮色底部投影，见 [frostFloatingShadow]）。
  *
- * 有捕获源（页面在 [FrostPageBackground] / [FrostGlassCapture] 里）时走 `drawBackdrop` +
- * `blur`：Android 需要 API 31+（RenderEffect），桌面 Skiko 恒可用；无捕获源或低于 API 门槛
- * 时回退为纯 alpha 近似（两种路径外观 continuity：填充/描边 token 相同，只是少了模糊）。
+ * 单路径 `drawBackdrop`：有捕获源（页面在 [FrostPageBackground] / [FrostGlassCapture] 里）
+ * 就真模糊，没有就 `emptyBackdrop()`——模糊空层等于没模糊，其余外观完全一致。
+ * 模糊需要 Android API 31+ / 桌面 Skiko；悬浮影只需 BlurMaskFilter，全 API 可用。
  * Solid / Glass 两种材质仍通过与 [FrostCard] 的分工表达，不另起一套 API。
  */
 @Composable
@@ -457,36 +474,26 @@ fun FrostGlassCard(
 ) {
     val shape = RoundedCornerShape(FrostSize.cardRadius)
     val backdrop = LocalFrostBackdrop.current
-    if (backdrop == null) {
-        // 回退：无捕获源。保持半透明 + 描边近似（旧路径，行为不变）
-        Column(
-            modifier =
-                modifier
-                    .fillMaxWidth()
-                    .clip(shape)
-                    .background(FrostGradient.glassFill)
-                    .border(1.dp, FrostGradient.glassStroke, shape),
-            content = content,
-        )
-    } else {
-        Column(
-            modifier =
-                modifier
-                    .fillMaxWidth()
-                    .drawBackdrop(
-                        backdrop = backdrop,
-                        shape = { shape },
-                        effects = {
+    val isDark = LocalFrostIsDark.current
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .drawBackdrop(
+                    backdrop = backdrop ?: emptyBackdrop(),
+                    shape = { shape },
+                    effects = {
+                        if (backdrop != null) {
                             blur(FrostSize.glassBlur.toPx())
-                        },
-                        highlight = null,
-                        shadow = null,
-                        // 表面填充画在模糊背景之上、内容之下（替代原来的 .background）
-                        onDrawSurface = { drawRect(FrostGradient.glassFill) },
-                    ).border(1.dp, FrostGradient.glassStroke, shape),
-            content = content,
-        )
-    }
+                        }
+                    },
+                    highlight = null,
+                    shadow = { frostFloatingShadow(isDark) },
+                    // 表面填充画在（模糊）背景之上、内容之下
+                    onDrawSurface = { drawRect(FrostGradient.glassFill) },
+                ).border(1.dp, FrostGradient.glassStroke, shape),
+        content = content,
+    )
 }
 
 /** 渐变条：用于空气质量、进度等"指示当前值"的场景 */
@@ -576,14 +583,21 @@ fun FrostFloatingNavPill(
             )
         }
 
+    val isDark = LocalFrostIsDark.current
     Row(
         modifier =
             modifier
                 .offset { IntOffset(offsetX.value.roundToInt(), offsetY.value.roundToInt()) }
                 .then(dragModifier)
-                .clip(CircleShape)
-                .background(FrostGradient.navPillFill)
-                .padding(horizontal = 28.dp, vertical = 12.dp),
+                // 胶囊本体是实心白（用户裁决：不做玻璃），但悬浮感要走同一套影子语言
+                .drawBackdrop(
+                    backdrop = emptyBackdrop(),
+                    shape = { CircleShape },
+                    effects = {},
+                    highlight = null,
+                    shadow = { frostFloatingShadow(isDark) },
+                    onDrawSurface = { drawRect(FrostGradient.navPillFill) },
+                ).padding(horizontal = 28.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(36.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

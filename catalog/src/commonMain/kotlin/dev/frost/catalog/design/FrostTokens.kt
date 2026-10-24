@@ -1,10 +1,19 @@
 package dev.frost.catalog.design
 
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+/**
+ * 当前视觉是否暗色。
+ *
+ * catalog 现阶段固定暗色视觉（亮色缺参照，见 state §四-5），所以默认 true；
+ * P3 主题层落地后由 FrostTheme 提供真实值。悬浮感（发光/投影）按它切换形态。
+ */
+val LocalFrostIsDark = staticCompositionLocalOf { true }
 
 /**
  * Frost 视觉 token —— 数值来自 `docs/design-spec.md`（对 22 张参考截图做直方图取样得出）。
