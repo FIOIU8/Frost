@@ -1,11 +1,15 @@
 package dev.frost.catalog
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.renderComposeScene
+import androidx.compose.ui.unit.Density
+import dev.frost.catalog.showcase.ShowcaseScreen
+import dev.frost.catalog.showcase.showcaseSections
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import java.io.File
 
 /**
- * 离屏渲染检查：不开窗口，把 [CatalogApp] 渲成 PNG。
+ * 离屏渲染检查：不开窗口把界面渲成 PNG。
  *
  * 为什么要有它：
  * - 沙箱/CI 里没有可交互的桌面会话，`./gradlew :catalog:run` 无法证明"渲染不崩"；
@@ -17,31 +21,49 @@ import java.io.File
 fun main(args: Array<String>) {
     val outDir = File(args.firstOrNull() ?: "build/baseline").apply { mkdirs() }
 
-    val targets =
-        listOf(
-            "monet-light" to ColorSchemeMode.MonetLight,
-            "monet-dark" to ColorSchemeMode.MonetDark,
-            "light" to ColorSchemeMode.Light,
-            "dark" to ColorSchemeMode.Dark,
-        )
-
-    targets.forEach { (name, mode) ->
-        val file = outDir.resolve("catalog-$name.png")
-        renderTo(file, mode)
+    // 1) 主题基线：同一张页面 × 四种主题模式
+    themeBaselines.forEach { (name, mode) ->
+        renderTo(outDir.resolve("catalog-$name.png")) {
+            CatalogApp(controller = rememberCatalogController(mode))
+        }
     }
 
-    println("baseline 输出目录：${outDir.absolutePath}")
+    // 2) 组件基线：每个巡礼小节 × 浅/深两套
+    val sections = showcaseSections()
+    sections.forEach { section ->
+        showcaseModes.forEach { (modeName, mode) ->
+            renderTo(outDir.resolve("showcase-${section.id}-$modeName.png")) {
+                ShowcaseScreen(section = section, controller = rememberCatalogController(mode))
+            }
+        }
+    }
+
+    val total = themeBaselines.size + sections.size * showcaseModes.size
+    println("baseline：$total 张 → ${outDir.absolutePath}")
 }
+
+private val themeBaselines =
+    listOf(
+        "monet-light" to ColorSchemeMode.MonetLight,
+        "monet-dark" to ColorSchemeMode.MonetDark,
+        "light" to ColorSchemeMode.Light,
+        "dark" to ColorSchemeMode.Dark,
+    )
+
+private val showcaseModes =
+    listOf(
+        "light" to ColorSchemeMode.Light,
+        "dark" to ColorSchemeMode.Dark,
+    )
 
 private fun renderTo(
     file: File,
-    mode: ColorSchemeMode,
+    content: @Composable () -> Unit,
 ) {
-    val image =
-        renderComposeScene(width = 1080, height = 1920) {
-            CatalogApp(controller = rememberCatalogController(mode))
-        }
+    // density=3：1080×1920 物理像素 → 360×640 dp，接近真实手机的逻辑尺寸，
+    // 否则组件按 1x 渲染会显得极小、基线上看不出细节。
+    val image = renderComposeScene(width = 1080, height = 1920, density = Density(3f), content = content)
     val data = image.encodeToData() ?: error("PNG 编码失败：$file")
     file.writeBytes(data.bytes)
-    println("rendered: ${file.name} (${image.width}x${image.height}, ${file.length()} bytes)")
+    println("rendered: ${file.name} (${file.length()} bytes)")
 }
