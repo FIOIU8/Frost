@@ -40,6 +40,18 @@ jobs:
       - name: Spotless check
         run: ./gradlew spotlessCheck --stacktrace
 
+      - name: 离屏渲染（无 GUI，验证 Compose + Skiko 渲染管线）
+        # xvfb 兜底：Linux runner 上没有显示服务器，Skiko 需要它才能建 surface
+        run: xvfb-run --auto-servernum ./gradlew :catalog:renderBaseline --stacktrace
+
+      - name: 上传渲染基线
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-baseline
+          path: "docs/baseline/p1/*.png"
+          if-no-files-found: warn
+
       - name: 上传测试报告（失败也传）
         if: always()
         uses: actions/upload-artifact@v4

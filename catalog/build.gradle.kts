@@ -1,4 +1,7 @@
 
+import org.gradle.api.tasks.JavaExec
+import org.gradle.jvm.toolchain.JavaLanguageVersion
+
 // :catalog —— 演示与验证模块（P1）
 //
 // P1-1：验证 Miuix 0.9.4 子模块坐标可解析（见 log 2026-10-24 15:25）
@@ -63,6 +66,28 @@ compose.desktop {
     application {
         mainClass = "dev.frost.catalog.MainKt"
     }
+}
+
+// 离屏渲染：不开窗口把 CatalogApp 渲成 PNG。
+// 用途 ① 证明 Compose+Skiko 渲染管线能跑通（CI / 无 GUI 环境）② 产出 P1 截图基线。
+tasks.register<JavaExec>("renderBaseline") {
+    group = "verification"
+    description = "离屏渲染 catalog 到 PNG（monet-light / monet-dark / light / dark）"
+    dependsOn("desktopJar")
+    mainClass.set("dev.frost.catalog.RenderCheckKt")
+    // 本任务是自己注册的，没有插件预设 executable，可直接用工具链 JDK 21 启动
+    javaLauncher.set(
+        javaToolchains.launcherFor {
+            languageVersion.set(JavaLanguageVersion.of(jvmToolchainVersion))
+        },
+    )
+    classpath = files(tasks.named("desktopJar")) + configurations.getByName("desktopRuntimeClasspath")
+    args =
+        listOf(
+            rootProject.layout.projectDirectory
+                .dir("docs/baseline/p1")
+                .asFile.absolutePath,
+        )
 }
 
 // Desktop 运行注意：本工程编译目标是 JDK 21（toolchain），但 Gradle 自身可以跑在
