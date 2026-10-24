@@ -40,6 +40,21 @@ jobs:
       - name: Spotless check
         run: ./gradlew spotlessCheck --stacktrace
 
+      - name: 依赖许可证审计（禁止 GPL/AGPL/SSPL，未知即失败）
+        run: |
+          ./gradlew :catalog:dependencies --configuration desktopRuntimeClasspath -q > "$RUNNER_TEMP/deps-desktop.txt"
+          ./gradlew :catalog-android:dependencies --configuration debugRuntimeClasspath -q > "$RUNNER_TEMP/deps-android.txt"
+          python3 tools/license_audit.py "$RUNNER_TEMP/deps-desktop.txt" "$RUNNER_TEMP/deps-android.txt" > "$RUNNER_TEMP/license-report.md"
+          echo "许可证审计通过：无禁止类、无未知"
+
+      - name: 上传许可证报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: ${{ runner.temp }}/license-report.md
+          if-no-files-found: warn
+
       - name: 离屏渲染（无 GUI，验证 Compose + Skiko 渲染管线）
         # xvfb 兜底：Linux runner 上没有显示服务器，Skiko 需要它才能建 surface
         run: xvfb-run --auto-servernum ./gradlew :catalog:renderBaseline --stacktrace
