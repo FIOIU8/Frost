@@ -21,7 +21,18 @@ import glob
 import xml.etree.ElementTree as ET
 from collections import Counter, defaultdict
 
-CACHE = os.path.expanduser("~/.gradle/caches/modules-2/files-2.1")
+# FROST_GRADLE_CACHE 可覆盖（测试回源分支用：指向一个不存在的目录即可）
+CACHE = os.environ.get(
+    "FROST_GRADLE_CACHE", os.path.expanduser("~/.gradle/caches/modules-2/files-2.1")
+)
+FETCH_DIR = os.path.join(os.path.expanduser("~"), ".cache", "frost-license-poms")
+
+# POM 可能不在 Gradle 缓存里：Gradle 对带 Gradle Module Metadata 的构件可能只取 .module
+# 不取 .pom（CI 全新缓存时尤其明显）。此时按仓库顺序回源取 POM，取不到才算 UNKNOWN。
+REPOS = (
+    "https://repo1.maven.org/maven2",
+    "https://dl.google.com/dl/android/maven2",
+)
 
 FORBIDDEN = tuple(x.upper() for x in ("GPL", "AGPL", "SSPL", "BUSL", "Commons Clause"))
 ALLOWED = tuple(
@@ -35,7 +46,27 @@ NS = {"m": "http://maven.apache.org/POM/4.0.0"}
 def find_pom(group, artifact, version):
     pat = os.path.join(CACHE, group, artifact, version, "*", f"{artifact}-{version}.pom")
     hits = glob.glob(pat)
-    return hits[0] if hits else None
+    if hits:
+        return hits[0]
+
+    os.makedirs(FETCH_DIR, exist_ok=True)
+    local = os.path.join(FETCH_DIR, f"{group}__{artifact}__{version}.pom")
+    if os.path.exists(local):
+        return local
+
+    import urllib.request
+
+    rel = f"{group.replace('.', '/')}/{artifact}/{version}/{artifact}-{version}.pom"
+    for repo in REPOS:
+        try:
+            with urllib.request.urlopen(f"{repo}/{rel}", timeout=20) as resp:
+                data = resp.read()
+            with open(local, "wb") as fh:
+                fh.write(data)
+            return local
+        except Exception:
+            continue
+    return None
 
 
 def pom_licenses(pom_path, depth=0, seen=None):
@@ -91,6 +122,16 @@ def main(argv):
                         continue
                     coords.add((g, a, selected or v))
 
+    # 并发预取缺失的 POM：串行回源 213 个构件要 5 分钟，8 线程后约 40 秒
+    missing = [c for c in coords if not glob.glob(
+        os.path.join(CACHE, c[0], c[1], c[2], "*", f"{c[1]}-{c[2]}.pom")
+    )]
+    if missing:
+        from concurrent.futures import ThreadPoolExecutor
+
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            list(pool.map(lambda c: find_pom(*c), missing))
+
     rows = []
     for g, a, v in sorted(coords):
         pom = find_pom(g, a, v)
@@ -115,7 +156,10 @@ def main(argv):
             verdict["review"] += 1
 
     print("# 依赖许可证报告\n")
-    print("> 由 `tools/license_audit.py` 生成；许可证数据来自构件 POM（含 parent 继承），不联网、不猜。")
+    print(
+        "> 由 `tools/license_audit.py` 生成；许可证一律取自构件 POM（含 parent 继承），"
+        "不靠名单猜。POM 优先读 Gradle 缓存，缺失时回源 repo1 / dl.google.com。"
+    )
     print(f"> 依赖总数 **{len(rows)}**：允许 {verdict['allowed']} / 需评审 {verdict['review']} / "
           f"禁止 {verdict['forbidden']} / 未知 {verdict['unknown']}\n")
 
