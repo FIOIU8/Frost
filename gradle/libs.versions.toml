@@ -1,0 +1,51 @@
+# ============================================================
+# Frost — 唯一版本真源（Single Source of Truth）
+# 规则：版本号只允许出现在本文件；构建脚本与 build-logic 禁止硬编码版本。
+# 对齐依据：docs/PLAN.md §3.3 版本对齐矩阵，2026-10-24 在 Maven Central
+#           / dl.google.com 逐个实测核对（见 docs/log/2026-10-24.md）。
+# ============================================================
+
+[versions]
+# ---- 构建工具链 ----
+agp = "9.4.1"
+kotlin = "2.4.21"
+composeMultiplatform = "1.12.2"
+spotless = "8.10.4"
+
+# ---- SDK / JVM ----
+android-compileSdk = "37"
+android-targetSdk = "37"
+android-minSdk = "24"
+jvm-toolchain = "21"
+
+# ---- 第三方底座（P1 起真正引入，P0 只登记）----
+miuix = "0.9.4"
+backdrop = "2.0.1"
+kyant-shapes = "1.2.1"
+
+[libraries]
+# Miuix 子模块。聚合构件 top.yukonga.miuix.kmp:miuix 只到 0.8.8，禁止使用。
+miuix-ui = { module = "top.yukonga.miuix.kmp:miuix-ui", version.ref = "miuix" }
+miuix-preference = { module = "top.yukonga.miuix.kmp:miuix-preference", version.ref = "miuix" }
+miuix-icons = { module = "top.yukonga.miuix.kmp:miuix-icons", version.ref = "miuix" }
+miuix-blur = { module = "top.yukonga.miuix.kmp:miuix-blur", version.ref = "miuix" }
+miuix-shader = { module = "top.yukonga.miuix.kmp:miuix-shader", version.ref = "miuix" }
+miuix-squircle = { module = "top.yukonga.miuix.kmp:miuix-squircle", version.ref = "miuix" }
+miuix-nav = { module = "top.yukonga.miuix.kmp:miuix-nav", version.ref = "miuix" }
+
+backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
+kyant-shapes = { module = "io.github.kyant0:shapes", version.ref = "kyant-shapes" }
+
+# build-logic 自身需要的插件实现（不走 plugins 块，避免版本二次声明）
+spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
+
+[bundles]
+miuix = ["miuix-ui", "miuix-preference", "miuix-icons", "miuix-blur", "miuix-shader", "miuix-squircle", "miuix-nav"]
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
