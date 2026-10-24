@@ -1,0 +1,21 @@
+Frost UI (霜面)
+Copyright 2026 FIOIU8
+
+This product includes software developed at:
+
+  Miuix
+  https://github.com/miuix-kotlin-multiplatform/miuix
+  Licensed under the Apache License, Version 2.0
+
+  Backdrop / AndroidLiquidGlass
+  https://github.com/Kyant0/AndroidLiquidGlass
+  Licensed under the Apache License, Version 2.0
+
+------------------------------------------------------------------------
+状态：骨架（P0-3）
+- 本项目当前未分发任何上游二进制或源码，以上条目为预留声明。
+- P1 引入 top.yukonga.miuix.kmp:*:0.9.4 依赖时，须把 Miuix 仓库内 NOTICE
+  原文（如存在）逐字复制到本文件对应条目下方，并核对版权人法定名称。
+- P2 以 git subtree 引入上游源码后，本文件须同步记录引入的 commit 与版本。
+- 不要删除本段之前的内容；新增条目追加在上方列表末尾。
+------------------------------------------------------------------------
