@@ -39,8 +39,8 @@ kotlin-js-store/
 *.iml
 *.ipr
 *.iws
-.vscode/
-!.vscode/extensions.json
+.vscode/*
+!/.vscode/extensions.json
 .DS_Store
 Thumbs.db
 *.log
@@ -61,6 +61,6 @@ publish/
 # ============================================================
 # 测试与基准
 # ============================================================
-**/screenshots/
+**/screenshots/*
 !**/screenshots/.gitkeep
 *.exec
