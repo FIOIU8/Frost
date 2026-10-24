@@ -3,6 +3,10 @@ package dev.frost.catalog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.renderComposeScene
 import androidx.compose.ui.unit.Density
+import dev.frost.catalog.design.FrostListScreen
+import dev.frost.catalog.design.FrostSettingsScreen
+import dev.frost.catalog.design.FrostSettingsWithSheet
+import dev.frost.catalog.design.FrostWeatherScreen
 import dev.frost.catalog.showcase.ShowcaseScreen
 import dev.frost.catalog.showcase.showcaseSections
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
@@ -38,7 +42,19 @@ fun main(args: Array<String>) {
         }
     }
 
-    val total = themeBaselines.size + sections.size * showcaseModes.size
+    // 3) Frost 视觉样张：按 22 张参考图的风格复刻，渲染尺寸与参考图一致（1240×2772 @3x）
+    val frostScreens =
+        listOf<Pair<String, @Composable () -> Unit>>(
+            "settings" to { FrostSettingsScreen() },
+            "settings-sheet" to { FrostSettingsWithSheet() },
+            "list" to { FrostListScreen() },
+            "weather" to { FrostWeatherScreen() },
+        )
+    frostScreens.forEach { (name, content) ->
+        renderTo(outDir.resolve("frost-$name.png"), width = 1240, height = 2772, content = content)
+    }
+
+    val total = themeBaselines.size + sections.size * showcaseModes.size + frostScreens.size
     println("baseline：$total 张 → ${outDir.absolutePath}")
 }
 
@@ -58,11 +74,12 @@ private val showcaseModes =
 
 private fun renderTo(
     file: File,
+    width: Int = 1080,
+    height: Int = 1920,
     content: @Composable () -> Unit,
 ) {
-    // density=3：1080×1920 物理像素 → 360×640 dp，接近真实手机的逻辑尺寸，
-    // 否则组件按 1x 渲染会显得极小、基线上看不出细节。
-    val image = renderComposeScene(width = 1080, height = 1920, density = Density(3f), content = content)
+    // density=3：物理像素 / 3 = 逻辑 dp，接近真实手机。按 1x 渲染会让组件小到看不清。
+    val image = renderComposeScene(width = width, height = height, density = Density(3f), content = content)
     val data = image.encodeToData() ?: error("PNG 编码失败：$file")
     file.writeBytes(data.bytes)
     println("rendered: ${file.name} (${file.length()} bytes)")
