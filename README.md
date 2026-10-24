@@ -73,6 +73,11 @@ Frost/
 # 环境要求：JDK 21（toolchain）、Android SDK Platform 37 + Build-Tools 37.0.0
 ./gradlew build          # 编译 + spotlessCheck
 ./gradlew spotlessApply  # 提交前格式化
+
+# Desktop 演示（catalog）
+# 注意：Gradle 自身也要跑在 JDK 21 上，否则 21 编译出的 class 在 17 上启动会
+# 报 UnsupportedClassVersionError（本工程的 toolchain 只约束编译，不约束 Gradle JVM）
+JAVA_HOME=/path/to/jdk-21 ./gradlew :catalog:run
 ```
 
 Android 构建还需要在根目录放 `local.properties`（**该文件已被 gitignore，禁止提交**）：

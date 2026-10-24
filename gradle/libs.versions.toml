@@ -36,6 +36,11 @@ miuix-nav = { module = "top.yukonga.miuix.kmp:miuix-nav", version.ref = "miuix" 
 backdrop = { module = "io.github.kyant0:backdrop", version.ref = "backdrop" }
 kyant-shapes = { module = "io.github.kyant0:shapes", version.ref = "kyant-shapes" }
 
+# Compose Multiplatform 运行库（不用 compose.runtime 之类的插件字符串访问器，
+# CMP 1.12 起已标记 deprecated：要求显式声明坐标）
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
+
 # build-logic 自身需要的插件实现（不走 plugins 块，避免版本二次声明）
 spotless-plugin-gradle = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 
