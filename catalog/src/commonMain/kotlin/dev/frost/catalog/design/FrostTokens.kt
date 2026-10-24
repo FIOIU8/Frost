@@ -28,6 +28,9 @@ object FrostColor {
 
     val switchOff = Color(0xFF3A3A3A)
     val radioRing = Color(0xFF4A4A4A)
+
+    /** 悬浮窗描边：dark 下阴影不可见，靠 1dp 亮边把浮层从背景里拉出来 */
+    val dialogStroke = Color(0xFF333333)
     val switchThumb = Color(0xFFFFFFFF)
 
     /** 强调色：由业务选，结构不变（对应 ThemeController(keyColor) 的模型） */

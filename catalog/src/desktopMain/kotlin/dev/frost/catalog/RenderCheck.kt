@@ -5,7 +5,7 @@ import androidx.compose.ui.renderComposeScene
 import androidx.compose.ui.unit.Density
 import dev.frost.catalog.design.FrostListScreen
 import dev.frost.catalog.design.FrostSettingsScreen
-import dev.frost.catalog.design.FrostSettingsWithSheet
+import dev.frost.catalog.design.FrostSettingsWithDialog
 import dev.frost.catalog.design.FrostWeatherScreen
 import dev.frost.catalog.showcase.ShowcaseScreen
 import dev.frost.catalog.showcase.showcaseSections
@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
     val frostScreens =
         listOf<Pair<String, @Composable () -> Unit>>(
             "settings" to { FrostSettingsScreen() },
-            "settings-sheet" to { FrostSettingsWithSheet() },
+            "settings-dialog" to { FrostSettingsWithDialog() },
             "list" to { FrostListScreen() },
             "weather" to { FrostWeatherScreen() },
         )

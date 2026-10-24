@@ -1,6 +1,7 @@
 package dev.frost.catalog.design
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -65,22 +67,34 @@ fun FrostSettingsScreen(accent: Color = FrostColor.accentRed) {
     }
 }
 
-/** 底部单选弹层：居中标题 + 右侧单选 + 底部单胶囊「取消」。 */
+/**
+ * 单选悬浮窗（**不是抽屉**）。
+ *
+ * 关键几何：参考图里弹窗**不贴屏幕边缘**——左右各留 12dp、底部留 24dp，
+ * 四个角都是圆的（28dp），下方还能露出被遮住页面的一行内容。
+ * 这是"悬浮窗"与"bottom sheet"最本质的区别，不能做成贴底 + 只有上面两角圆。
+ *
+ * 另外这里加了 1dp 描边 + 阴影：dark 主题下没有阴影的话，浮层会和背景糊在一起。
+ */
 @Composable
-fun FrostOptionSheet(
+fun FrostOptionDialog(
     title: String,
     options: List<Pair<String, String?>>,
     selectedIndex: Int,
     accent: Color = FrostColor.accentRed,
     modifier: Modifier = Modifier,
 ) {
+    val shape = RoundedCornerShape(FrostSize.sheetRadius)
     Column(
         modifier =
             modifier
+                .padding(horizontal = 12.dp, vertical = 24.dp)
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(topStart = FrostSize.sheetRadius, topEnd = FrostSize.sheetRadius))
+                .shadow(elevation = 24.dp, shape = shape, clip = false)
+                .clip(shape)
                 .background(FrostColor.surfaceElevated)
-                .padding(horizontal = FrostSize.screenPadding, vertical = 12.dp),
+                .border(1.dp, FrostColor.dialogStroke, shape)
+                .padding(horizontal = 20.dp, vertical = 14.dp),
     ) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             FrostText(title, FrostType.sheetTitle)
@@ -116,13 +130,13 @@ fun FrostOptionSheet(
     }
 }
 
-/** 设置页 + 打开状态的弹层（参考图 1 的整体效果） */
+/** 设置页 + 打开状态的悬浮窗（参考图 1 的整体效果） */
 @Composable
-fun FrostSettingsWithSheet(accent: Color = FrostColor.accentRed) {
+fun FrostSettingsWithDialog(accent: Color = FrostColor.accentRed) {
     Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(FrostGradient.pageDark))) {
         FrostSettingsScreen(accent)
         Box(modifier = Modifier.fillMaxSize().background(Color(0x8C000000)))
-        FrostOptionSheet(
+        FrostOptionDialog(
             title = "录音模式",
             options =
                 listOf(
