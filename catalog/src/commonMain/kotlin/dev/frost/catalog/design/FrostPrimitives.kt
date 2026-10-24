@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /** 文本原语：唯一允许写 Text 的地方，其它组件都调它。 */
 @Composable
@@ -136,12 +137,12 @@ fun FrostRow(
             }
 
             FrostIndicator.Chevron -> {
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(11.dp))
                 FrostText("›", FrostType.value, FrostColor.textTertiary)
             }
 
             FrostIndicator.Picker -> {
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(11.dp))
                 FrostText("◇", FrostType.value, FrostColor.textTertiary)
             }
 
@@ -270,7 +271,59 @@ fun FrostCountBadge(
     }
 }
 
-/** 顶栏：返回箭头 + 标题（居中偏左），左侧箭头是纯文字字形，先不引图标库。 */
+/**
+ * 返回箭头：Canvas 手绘。
+ *
+ * 为什么不用 "←" 字形：字形的高度远小于参考图（参考 63×58px，字形只有 25px 高），
+ * 会导致标题整体左移，靠调字号永远对不上。用两条线 + 一个折角反而精确。
+ */
+@Composable
+fun FrostBackArrow(
+    color: Color = FrostColor.textPrimary,
+    boxSize: Dp = 24.dp,
+) {
+    androidx.compose.foundation.Canvas(Modifier.size(boxSize)) {
+        val w = size.width
+        val h = size.height
+        val cy = h / 2f
+        val stroke = 2.dp.toPx()
+        drawLine(
+            color = color,
+            start =
+                androidx.compose.ui.geometry
+                    .Offset(w * 0.08f, cy),
+            end =
+                androidx.compose.ui.geometry
+                    .Offset(w * 0.95f, cy),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            color = color,
+            start =
+                androidx.compose.ui.geometry
+                    .Offset(w * 0.42f, cy - h * 0.40f),
+            end =
+                androidx.compose.ui.geometry
+                    .Offset(w * 0.08f, cy),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+        drawLine(
+            color = color,
+            start =
+                androidx.compose.ui.geometry
+                    .Offset(w * 0.42f, cy + h * 0.40f),
+            end =
+                androidx.compose.ui.geometry
+                    .Offset(w * 0.08f, cy),
+            strokeWidth = stroke,
+            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }
+}
+
+/** 顶栏：返回箭头 + 标题（居中偏左）。 */
 @Composable
 fun FrostNavBar(title: String) {
     Row(
@@ -280,8 +333,10 @@ fun FrostNavBar(title: String) {
                 .padding(horizontal = FrostSize.screenPadding, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        FrostText("←", FrostType.navTitle, FrostColor.textPrimary)
-        Spacer(Modifier.width(12.dp))
+        // 参考图箭头实测 63×58px（21×19dp）。用字形画不出这个比例，改为 Canvas 绘制
+        FrostBackArrow()
+        // 箭头右端到标题左端实测 66px ≈ 22dp
+        Spacer(Modifier.width(22.dp))
         FrostText(title, FrostType.navTitle)
     }
 }

@@ -95,10 +95,10 @@ data class FrostTextStyle(
 
 object FrostType {
     val display = FrostTextStyle(34.sp, 40.sp, FontWeight.Bold)
-    val navTitle = FrostTextStyle(22.sp, 28.sp, FontWeight.Medium)
-    val rowTitle = FrostTextStyle(17.sp, 22.sp, FontWeight.Normal)
+    val navTitle = FrostTextStyle(20.sp, 26.sp, FontWeight.Medium)
+    val rowTitle = FrostTextStyle(18.sp, 24.sp, FontWeight.Normal)
     val rowSubtitle = FrostTextStyle(13.sp, 18.sp, FontWeight.Normal)
-    val value = FrostTextStyle(16.sp, 21.sp, FontWeight.Normal)
+    val value = FrostTextStyle(15.sp, 20.sp, FontWeight.Normal)
     val sectionLabel = FrostTextStyle(13.sp, 16.sp, FontWeight.Normal)
     val sheetTitle = FrostTextStyle(20.sp, 26.sp, FontWeight.Medium)
     val sheetDesc = FrostTextStyle(13.sp, 19.sp, FontWeight.Normal)
@@ -108,8 +108,8 @@ object FrostType {
 
 /** 尺寸，见 design-spec §4 */
 object FrostSize {
-    val screenPadding = 20.dp
-    val cardPadding = 20.dp
+    val screenPadding = 19.dp
+    val cardPadding = 19.dp
     val cardRadius = 22.dp
     val sheetRadius = 28.dp
     val iconRadius = 14.dp
@@ -117,12 +117,12 @@ object FrostSize {
     val rowHeight = 57.dp
     val rowHeightTwoLine = 72.dp
     val dividerThickness = 1.dp
-    val dividerInset = 20.dp
+    val dividerInset = 19.dp
 
     val cardGap = 18.dp
     val sectionLabelTop = 14.dp
     val sectionLabelBottom = 8.dp
-    val sectionLabelStart = 24.dp
+    val sectionLabelStart = 38.dp
 
     val pillHeight = 52.dp
     val switchWidth = 51.dp
