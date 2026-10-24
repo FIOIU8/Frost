@@ -15,6 +15,9 @@
 - 约定插件 `build-logic`：`frost.quality`（Spotless + ktlint）、`frost.toolchain`（JDK 21 工具链）
 - CI：`.github/workflows/ci.yml`（JDK 21 + Gradle 缓存 + `build` + `spotlessCheck`）
 - 文档：`README.md`、`CONTRIBUTING.md`（DCO + Conventional Commits）
+- 组件展示页（showcase）与 30 张基线截图（`renderBaseline` 离屏出图）
+- Frost 视觉层 v0：token（色/字/尺寸/渐变）+ 14 个原语 + 5 张参考图 1:1 复刻样张，像素级校准
+- 玻璃真模糊：`FrostGlassCard` 接 Backdrop 2.0.1（Android 31+ / 桌面 Skiko），无捕获源时回退半透明近似；`LocalFrostBackdrop` / `FrostGlassCapture` 接线原语与 `frost-glass-probe` 验证样张
 
 ### Changed
 

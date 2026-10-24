@@ -51,8 +51,9 @@ object FrostColor {
 /**
  * 材质层：颜色只是底，外观来自「渐变 + 模糊」（design-spec §2.5）。
  *
- * 说明：这里的 glass 只是**半透明 + 描边**的近似，真正的背景模糊（RenderEffect / miuix-blur）
- * 放到 P4，因为 miuix-blur 要求 minSdk 33。别误以为这里已经做了模糊。
+ * 说明：glass 卡片的**真实背景模糊**已通过 Backdrop 2.0.1 接线（[dev.frost.catalog.design.FrostGlassCard]），
+ * 依赖 RenderEffect（Android 31+ / 桌面 Skiko）。无捕获源或低于 API 门槛时回退为这里的
+ * 半透明近似。完整的能力矩阵与降级策略仍在 P4。
  */
 object FrostGradient {
     /** 普通页面背景：极淡自上而下渐变，用来"托起"状态栏 */
@@ -125,6 +126,9 @@ object FrostSize {
     val sectionLabelStart = 38.dp
 
     val pillHeight = 52.dp
+
+    /** 玻璃模糊半径：design-spec §2.5 给的区间是 24–40dp（背景越复杂越大），平滑渐变取下限 */
+    val glassBlur = 24.dp
     val switchWidth = 51.dp
     val switchHeight = 31.dp
     val switchThumb = 27.dp

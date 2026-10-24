@@ -49,7 +49,8 @@ kotlin {
             // 聚合构件 top.yukonga.miuix.kmp:miuix 只到 0.8.8，必须逐个子模块引用
             implementation(libs.bundles.miuix)
 
-            // 液态玻璃：Backdrop（Android 端真实背景模糊）。桌面端无捕获源，走回退。
+            // 液态玻璃：Backdrop 2.0.1（KMP）。blur 走 RenderEffect：Android API 31+，
+            // 桌面 Skiko 恒可用（实读 Platform.kt 确认，桌面并非"只能回退"）
             implementation(libs.backdrop)
 
             // Compose 运行库版本由 libs.versions.toml 的 composeMultiplatform 决定（1.12.2），

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +29,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
 
 /** 文本原语：唯一允许写 Text 的地方，其它组件都调它。 */
 @Composable
@@ -359,28 +364,41 @@ fun FrostBigHeader(
     }
 }
 
-/** 页面背景：垂直渐变，不是纯色（design-spec §2.5-(1)） */
+/**
+ * 页面背景：垂直渐变，不是纯色（design-spec §2.5-(1)）。
+ *
+ * 同时它还是玻璃的**捕获源**：渐变经 [layerBackdrop] 记录进 [LocalFrostBackdrop]，
+ * 页面里的 [FrostGlassCard] 借此拿到真实背景模糊。捕获的只有渐变本身——
+ * `layerBackdrop` 要放在 `background` **之前**（它记录的是"内层画了什么"），
+ * 且内容必须画在这个 Box 之外，否则单帧渲染里玻璃读到的是空层。
+ */
 @Composable
 fun FrostPageBackground(
     colors: List<Color> = FrostGradient.pageDark,
     content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(Brush.verticalGradient(colors)),
-    ) {
-        content()
+    val backdrop = rememberLayerBackdrop()
+    CompositionLocalProvider(LocalFrostBackdrop provides backdrop) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .layerBackdrop(backdrop)
+                        .background(Brush.verticalGradient(colors)),
+            )
+            Box(modifier = Modifier.fillMaxSize()) { content() }
+        }
     }
 }
 
 /**
- * 玻璃卡片：半透明填充 + 1dp 描边。
+ * 玻璃卡片：半透明填充 + 1dp 描边 + **真实背景模糊**（Backdrop 2.0.1 接线，2026-10-24 起）。
  *
- * ⚠️ 这里**没有真正的背景模糊**——半透明只是近似。真模糊要走 P4（RenderEffect / miuix-blur，
- * 后者要求 minSdk 33）。所以这个组件的行为要与 [FrostCard] 可切换（Solid / Glass 两种材质），
- * 而不是另起一套 API。
+ * 有捕获源（页面在 [FrostPageBackground] / [FrostGlassCapture] 里）时走 `drawBackdrop` +
+ * `blur`：Android 需要 API 31+（RenderEffect），桌面 Skiko 恒可用；无捕获源或低于 API 门槛
+ * 时回退为纯 alpha 近似（两种路径外观 continuity：填充/描边 token 相同，只是少了模糊）。
+ * Solid / Glass 两种材质仍通过与 [FrostCard] 的分工表达，不另起一套 API。
  */
 @Composable
 fun FrostGlassCard(
@@ -388,15 +406,37 @@ fun FrostGlassCard(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val shape = RoundedCornerShape(FrostSize.cardRadius)
-    Column(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(shape)
-                .background(FrostGradient.glassFill)
-                .border(1.dp, FrostGradient.glassStroke, shape),
-        content = content,
-    )
+    val backdrop = LocalFrostBackdrop.current
+    if (backdrop == null) {
+        // 回退：无捕获源。保持半透明 + 描边近似（旧路径，行为不变）
+        Column(
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .clip(shape)
+                    .background(FrostGradient.glassFill)
+                    .border(1.dp, FrostGradient.glassStroke, shape),
+            content = content,
+        )
+    } else {
+        Column(
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .drawBackdrop(
+                        backdrop = backdrop,
+                        shape = { shape },
+                        effects = {
+                            blur(FrostSize.glassBlur.toPx())
+                        },
+                        highlight = null,
+                        shadow = null,
+                        // 表面填充画在模糊背景之上、内容之下（替代原来的 .background）
+                        onDrawSurface = { drawRect(FrostGradient.glassFill) },
+                    ).border(1.dp, FrostGradient.glassStroke, shape),
+            content = content,
+        )
+    }
 }
 
 /** 渐变条：用于空气质量、进度等"指示当前值"的场景 */

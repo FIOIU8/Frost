@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.renderComposeScene
 import androidx.compose.ui.unit.Density
 import dev.frost.catalog.design.FrostFontProvider
+import dev.frost.catalog.design.FrostGlassProbeScreen
 import dev.frost.catalog.design.FrostListScreen
 import dev.frost.catalog.design.FrostSettingsScreen
 import dev.frost.catalog.design.FrostSettingsWithDialog
@@ -52,6 +53,8 @@ fun main(args: Array<String>) {
             "list" to { FrostFontProvider { FrostListScreen() } },
             "weather" to { FrostFontProvider { FrostWeatherScreen() } },
             "weather-settings" to { FrostFontProvider { FrostWeatherSettingsScreen() } },
+            // 玻璃探针：验证样张（非参考图复刻）——真模糊 vs 回退并排，防"模糊悄悄失效"
+            "glass-probe" to { FrostFontProvider { FrostGlassProbeScreen() } },
         )
     frostScreens.forEach { (name, content) ->
         renderTo(outDir.resolve("frost-$name.png"), width = 1240, height = 2772, content = content)
@@ -68,7 +71,6 @@ private val themeBaselines =
         "light" to ColorSchemeMode.Light,
         "dark" to ColorSchemeMode.Dark,
     )
-
 private val showcaseModes =
     listOf(
         "light" to ColorSchemeMode.Light,
