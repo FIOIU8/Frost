@@ -3,6 +3,7 @@ package dev.frost.catalog
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.renderComposeScene
 import androidx.compose.ui.unit.Density
+import dev.frost.catalog.design.FrostFontProvider
 import dev.frost.catalog.design.FrostListScreen
 import dev.frost.catalog.design.FrostSettingsScreen
 import dev.frost.catalog.design.FrostSettingsWithDialog
@@ -46,11 +47,11 @@ fun main(args: Array<String>) {
     // 3) Frost 视觉样张：按 22 张参考图的风格复刻，渲染尺寸与参考图一致（1240×2772 @3x）
     val frostScreens =
         listOf<Pair<String, @Composable () -> Unit>>(
-            "settings" to { FrostSettingsScreen() },
-            "settings-dialog" to { FrostSettingsWithDialog() },
-            "list" to { FrostListScreen() },
-            "weather" to { FrostWeatherScreen() },
-            "weather-settings" to { FrostWeatherSettingsScreen() },
+            "settings" to { FrostFontProvider { FrostSettingsScreen() } },
+            "settings-dialog" to { FrostFontProvider { FrostSettingsWithDialog() } },
+            "list" to { FrostFontProvider { FrostListScreen() } },
+            "weather" to { FrostFontProvider { FrostWeatherScreen() } },
+            "weather-settings" to { FrostFontProvider { FrostWeatherSettingsScreen() } },
         )
     frostScreens.forEach { (name, content) ->
         renderTo(outDir.resolve("frost-$name.png"), width = 1240, height = 2772, content = content)

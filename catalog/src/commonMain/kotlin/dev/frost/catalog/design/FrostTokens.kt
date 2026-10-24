@@ -95,8 +95,8 @@ data class FrostTextStyle(
 
 object FrostType {
     val display = FrostTextStyle(34.sp, 40.sp, FontWeight.Bold)
-    val navTitle = FrostTextStyle(20.sp, 26.sp, FontWeight.Medium)
-    val rowTitle = FrostTextStyle(18.sp, 24.sp, FontWeight.Normal)
+    val navTitle = FrostTextStyle(21.sp, 27.sp, FontWeight.Medium)
+    val rowTitle = FrostTextStyle(19.sp, 25.sp, FontWeight.Normal)
     val rowSubtitle = FrostTextStyle(13.sp, 18.sp, FontWeight.Normal)
     val value = FrostTextStyle(15.sp, 20.sp, FontWeight.Normal)
     val sectionLabel = FrostTextStyle(13.sp, 16.sp, FontWeight.Normal)

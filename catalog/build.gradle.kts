@@ -56,6 +56,8 @@ kotlin {
             // 编译器插件版本跟随 Kotlin（2.4.21），两者由 CMP/Kotlin 插件各自保证
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
+            // Compose Resources：把字体作为资源打进两端，避免"渲染用回退字体"
+            implementation(compose.components.resources)
         }
 
         // Desktop 入口需要 Skiko 运行时（按当前 OS 解析）
@@ -63,6 +65,11 @@ kotlin {
             implementation(compose.desktop.currentOs)
         }
     }
+}
+
+// 字体资源：显式指定资源访问类的包名，避免依赖默认推导
+compose.resources {
+    packageOfResClass = "dev.frost.catalog.resources"
 }
 
 compose.desktop {

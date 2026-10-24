@@ -46,6 +46,7 @@ fun FrostText(
                 fontSize = style.size,
                 lineHeight = style.lineHeight,
                 fontWeight = style.weight,
+                fontFamily = LocalFrostFontFamily.current,
             ),
     )
 }

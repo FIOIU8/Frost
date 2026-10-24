@@ -13,7 +13,13 @@
 | Shapes（`io.github.kyant0:shapes` 1.2.1，Backdrop 传递依赖） | Kyant（待 P1 核对全称） | Apache-2.0 | https://github.com/Kyant0/AndroidLiquidGlass |
 | material-color-utilities（`com.materialkolor:material-color-utilities` 5.0.1，Miuix 的 Monet 取色传递依赖） | **Jordon de Hoog** | **MIT**（必须保留版权声明，见文末原文） | https://github.com/jordond/materialkolor |
 | Skiko（`org.jetbrains.skiko:skiko` 0.150.2，Compose Desktop 渲染后端） | JetBrains | Apache-2.0 | https://github.com/JetBrains/skiko |
+| Noto Sans SC Regular（`catalog/src/commonMain/composeResources/font/`，随包分发的中文字体） | Google / Noto Project | **OFL-1.1** | https://github.com/notofonts/noto-cjk |
 
+> **字体补录（2026-10-24 21:05）**：为了让离屏渲染与真机用同一套字（此前渲染走
+> Skiko 的 CJK 回退字体，字宽与系统黑体不同，导致截图与真机观感不一致），
+> 随包分发 Noto Sans SC Regular。OFL-1.1 要求随分发物附带许可与字体名，
+> 原文已存于 `catalog/licenses/NotoSansSC-OFL.txt`。
+>
 > **2026-10-24 审计补录**：`tools/license_audit.py` 扫出的 213 个运行时依赖里，只有
 > `com.materialkolor:*` 是 **MIT**，其余全是 Apache-2.0。MIT 要求"在分发时保留版权声明"，
 > 单靠本表的行还不够——原文已贴在文末，发布物（jar/zip）里必须带上本文件。
